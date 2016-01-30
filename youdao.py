@@ -3,7 +3,7 @@
 import urllib2,json
 def youdao(word):
     qword = urllib2.quote(word)
-    baseurl =r'http://fanyi.youdao.com/openapi.do?keyfrom=shidajiayuan&key=183744762&type=data&doctype=json&version=1.1&q='
+    baseurl =r'http://fanyi.youdao.com/openapi.do?keyfrom= ?&key=?&type=data&doctype=json&version=1.1&q='
     url = baseurl+qword
     resp = urllib2.urlopen(url)
     fanyi = json.loads(resp.read())

@@ -9,6 +9,7 @@ import pylibmc
 import db
 from lxml import etree
 from youdao import youdao
+from book  import query_book
 class WeixinInterface:
  
     def __init__(self):
@@ -51,7 +52,7 @@ class WeixinInterface:
             mscontent = xml.find("Event").text
          
             if mscontent == "subscribe":
-                replayText = u'''欢迎关注本微信,哈哈~！在这里我会不定期推送有关大数据、云计算方面的内容。\n你可以【查看历史消息】来看已发布过的自己感兴趣的内容，也可以输入【menu】去探索我开发的一些功能。\n\n【博客地址】 http://blog.csdn.net/zwto1 '''
+                replayText = u'''欢迎关注本微信,哈哈~！在这里我会不定期推送有关大数据、云计算方面的内容。\n功能列表：1.输入t+中文或者英文返回对应的英中翻译\n2.输入【m】随机来首音乐听，建议在wifi下听\n3.输入【Ly+你的留言内容】,来给我留言\n4.【博客地址】 http://blog.csdn.net/zwto1\n 5.【查阅书籍信息】输入书籍名，便可查看相关书籍信息。\n\n你可以【查看历史消息】来看已发布过的自己感兴趣的内容，也可以输入【menu】去探索我开发的一些功能。 '''
                 return self.render.reply_text(fromUser,toUser,int(time.time()),replayText)                                                                
           
             if mscontent == "unsubscribe":
@@ -63,18 +64,17 @@ class WeixinInterface:
             content=xml.find("Content").text
           
             if content.lower() == 'menu':
-                replayText = u'''1.输入中文或者英文返回对应的英中翻译\n2.输入【m】随机来首音乐听，建议在wifi下听\n3.输入【Ly+你的留言内容】,来给我留言\n4.【博客地址】 http://blog.csdn.net/zwto1 \n\n 不要忘记你可以【查看历史消息】来看已发布过的自己感兴趣的内容哟^_^''' #3.输入【xhj】进入调戏小黄鸡模式\n
+                replayText = u'''1.输入t+中文或者英文返回对应的英中翻译\n2.输入【m】随机来首音乐听，建议在wifi下听\n3.输入【Ly+你的留言内容】,来给我留言\n4.【博客地址】 http://blog.csdn.net/zwto1\n 5.【查阅书籍信息】输入书籍名，便可查看相关书籍信息\n\n 不要忘记你可以【查看历史消息】来看已发布过的自己感兴趣的内容哟^_^''' #3.输入【xhj】进入调戏小黄鸡模式\n
                 return self.render.reply_text(fromUser,toUser,int(time.time()),replayText)
                              
             
             #音乐随机播放
             if content.lower() == 'm':
                 musicList = [
-                             [r'http://sc1.111ttt.com/2014/1/09/27/2272158233.mp3',u'太平洋的风',u'献给xx'],
-                             [r'http://sc1.111ttt.com/2015/1/05/15/98150940396.mp3',u'被遗忘的时光',u'献给xx'],
-                             [r'http://sc.111ttt.com/up/mp3/270287/C1CCB40234BF86FC682B7465B6982C32.mp3',u'only time',u'献给xx'],
-                             [r'http://sc.111ttt.com/up/mp3/103084/BE28EFC3DA5D4770AC51A706D77A3146.mp3',u'Amarantine',u'献给xx'],
-                             [r'http://mp3.ldstars.com/down/4940.mp3',u'当我离开你的时候',u'献给xx']
+                             [r'','Destiny',u'献给虫虫'],            # r 后加音乐链接
+                             [r'','5 Days',u'献给虫虫'],
+                             [r'','Far Away (Album Version)',u'献给虫虫'],
+                             [r'',u'少年游',u'献给虫虫'],
                                                      
                              ]
 
@@ -92,8 +92,26 @@ class WeixinInterface:
 
             elif type(content).__name__ == "unicode":
               content = content.encode('UTF-8')
+
+            if(content.startswith('t')):
+
+                Nword = youdao(content[1:])        
+                return self.render.reply_text(fromUser,toUser,int(time.time()),Nword) 
+
+            else:
+               book = query_book(content)
+               if book == '':
+                  return self.render.reply_text(fromUser,toUser,int(time.time()),u'对不起，你查找的图书不存在！') 
+               else:    
+             # description = query_book_details()
+                 book_title = book["title"]
+                 book_img = book["images"]["large"]
+                 description = book["summary"]
+                 book_alt = book['alt']
              
-            Nword = youdao(content)        
-            return self.render.reply_text(fromUser,toUser,int(time.time()),Nword) 
+                 return self.render.reply_tw(fromUser,toUser,int(time.time()), book_title, description,book_img, book_alt) 
+
+              
+
     
     
